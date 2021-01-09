@@ -1,8 +1,8 @@
 # CommitLinter
 
 CommitLinter enables to validate commit message against simple five rules. If the message not satisfies the rule it throws respective errors.
-1. Separate subject from body with a blank line (Work in progress)
-2. Limit the commit subject line to 50 characters.
+1. Separate subject from body with a blank line
+2. Limit the commit subject line to 50 characters
 3. Capitalize the subject line
 4. Do not end the subject line with a period
 5. Use the imperative mood in the subject line (Work in progress)

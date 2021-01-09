@@ -11,17 +11,22 @@ import sys
 # Read passed message through argument.
 messageFile = sys.argv[1]
 file = open(messageFile, 'r')
-message = file.read()
+message = file.read().split("\n")
+subject = message[0]
 
-if len(message) >= 50:
+if (len(message) > 2) & (message[1] != ''):
+  # Subject & body should separate with a blank line.
+  print("Err: Separate subject from body with a blank line")
+  exit(1)
+elif len(subject) > 50:
   # Message subject line length should not be more than 50.
   print("Err: Limit the commit subject line to 50 characters")
   exit(1)
-elif message[0].islower():
+elif subject[0].islower():
   # The first character must be uppercase.
   print("Err: Capitalize the commit subject line")
   exit(1)
-elif message[-2] == '.':
+elif subject[-1] == '.':
   print("Err: Do not end the commit subject line with a period")
   exit(1)
 else:
