@@ -7,28 +7,95 @@
 # commit.  The hook is allowed to edit the commit message file.
 #
 import sys
+from pattern.text.en.modality import imperative
+from pattern.text.en import parse, Sentence, conjugate
 
-# Read passed message through argument.
-messageFile = sys.argv[1]
-file = open(messageFile, 'r')
-message = file.read().split("\n")
-subject = message[0]
-subject_length = len(subject)
-if (len(message) > 2) & (message[1] != ''):
-  # Subject & body should separate with a blank line.
-  print("Err: Separate subject from body with a blank line")
-  exit(1)
-elif subject_length > 50:
-  # Message subject line length should not be more than 50.
-  print("Err: Limit the commit subject line to 50 characters")
-  print("Current subject line count is: ", subject_length)
-  exit(1)
-elif subject[0].islower():
-  # The first character must be uppercase.
-  print("Err: Capitalize the commit subject line")
-  exit(1)
-elif subject[-1] == '.':
-  print("Err: Do not end the commit subject line with a period")
-  exit(1)
-else:
-  exit(0)
+# Helper functions.
+def under_char_limit(msg, error_queue):
+  if len(msg) > 50:
+    error_queue.append("Commit message longer than 50 characters.")
+    return False
+
+  return True
+
+def ends_at_period(msg, error_queue):
+  if msg[-1] == '.':
+    error_queue.append("Commit message should not end with a trailing dot.")
+    return msg[:-1]
+
+  return msg
+
+def is_capitalized(msg, error_queue):
+  if msg[0].islower():
+    error_queue.append("Commit message should be capitalized.")
+    return msg.capitalize()
+
+  return msg
+
+
+def is_body_separated(msg, error_queue):
+  if (len(msg) > 2) & (msg[1] != '')
+    error_queue.append("Separate subject from body with a blank line")
+    return False
+
+  return True
+
+def is_imperative(msg, error_queue):
+  if imperative(Sentence(parse(msg))):
+    return True
+
+  error_queue.append("Commit message should be imperative.")
+  return False
+
+def make_imperative(msg):
+  # Get verb.
+  tokenized_msg = msg.split()
+  verb = tokenized_msg[0]
+
+  # Verb in imperative mood === Verb in second person, indicative, present tense
+  fixed_verb = conjugate(verb, mood="indicative", person=2, tense="present")
+
+  if verb.istitle():
+    fixed_verb = fixed_verb.title()
+  elif verb.isupper():
+    fixed_verb = fixed_verb.upper()
+  elif verb.islower():
+    fixed_verb = fixed_verb.lower()
+
+    tokenized_msg[0] = fixed_verb
+    return " ".join(tokenized_msg)
+
+def main():
+  # Read passed message through argument.
+  messageFile = sys.argv[1]
+  file = open(messageFile, 'r')
+  message = file.read().split("\n")
+  subject = message[0]
+  body = message[1:]
+
+  error_queue = []
+
+  subject = is_capitalized(subject, error_queue)
+  subject = ends_at_period(subject, error_queue)
+  # is_body_separated(msg, error_queue)
+
+  need_imperative_change = is_imperative(subject, error_queue)
+  if (need_imperative_change):
+    subject = make_imperative(subject)
+
+  if error_queue:
+    print("Commit message analysis: ")
+    for error in error_queue:
+      print(error)
+
+  if not under_char_limit(subject):
+    raise ValueError("Shorten your commit")
+
+  if not error_queue:
+    print("Good commit message.")
+
+  with.open(messageFile, "w") as file:
+    file.writelines([subject + "\n", *body])
+
+
+main()
