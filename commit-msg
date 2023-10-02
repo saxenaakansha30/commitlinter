@@ -11,9 +11,8 @@ from pattern.text.en.modality import imperative
 from pattern.text.en import parse, Sentence, conjugate
 
 # Helper functions.
-def under_char_limit(msg, error_queue):
+def under_char_limit(msg):
   if len(msg) > 50:
-    error_queue.append("Commit message longer than 50 characters.")
     return False
 
   return True
@@ -34,7 +33,7 @@ def is_capitalized(msg, error_queue):
 
 
 def is_body_separated(msg, error_queue):
-  if (len(msg) > 2) & (msg[1] != '')
+  if (len(msg) > 2) & (msg[1] != ''):
     error_queue.append("Separate subject from body with a blank line")
     return False
 
@@ -62,8 +61,8 @@ def make_imperative(msg):
   elif verb.islower():
     fixed_verb = fixed_verb.lower()
 
-    tokenized_msg[0] = fixed_verb
-    return " ".join(tokenized_msg)
+  tokenized_msg[0] = fixed_verb
+  return " ".join(tokenized_msg)
 
 def main():
   # Read passed message through argument.
@@ -79,9 +78,9 @@ def main():
   subject = ends_at_period(subject, error_queue)
   # is_body_separated(msg, error_queue)
 
-  need_imperative_change = is_imperative(subject, error_queue)
-  if (need_imperative_change):
+  if not is_imperative(subject, error_queue):
     subject = make_imperative(subject)
+
 
   if error_queue:
     print("Commit message analysis: ")
@@ -94,7 +93,7 @@ def main():
   if not error_queue:
     print("Good commit message.")
 
-  with.open(messageFile, "w") as file:
+  with open(messageFile, "w") as file:
     file.writelines([subject + "\n", *body])
 
 
