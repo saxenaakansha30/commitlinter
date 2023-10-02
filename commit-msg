@@ -9,6 +9,7 @@
 import sys
 from pattern.text.en.modality import imperative
 from pattern.text.en import parse, Sentence, conjugate
+from termcolor import colored
 
 # Helper functions.
 def under_char_limit(msg):
@@ -81,20 +82,21 @@ def main():
   if not is_imperative(subject, error_queue):
     subject = make_imperative(subject)
 
-
   if error_queue:
-    print("Commit message analysis: ")
+    print(f"{colored('Commit linter analysis: ', 'cyan')}\n")
     for error in error_queue:
-      print(error)
+      print(f"{colored(error, 'red')}")
+    print('\n')
 
   if not under_char_limit(subject):
     raise ValueError("Shorten your commit")
 
   if not error_queue:
-    print("Good commit message.")
+    print(f"{colored('Good commit message. :)', 'green')}\n")
+  else:
+    print(f"{colored('Message fixed to: ' + subject, 'green')}\n")
 
   with open(messageFile, "w") as file:
     file.writelines([subject + "\n", *body])
-
 
 main()
